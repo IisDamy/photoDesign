@@ -1,2 +1,0 @@
-# photoDesign
-In the making
