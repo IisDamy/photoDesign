@@ -12,7 +12,7 @@
 
 # testing
 /coverage
-
+/public/videos
 # next.js
 /.next/
 /out/
@@ -39,3 +39,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+public/videos/clip.mp4
