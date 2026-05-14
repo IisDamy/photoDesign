@@ -1,68 +1,76 @@
-'use client'
-import {motion} from 'motion/react';
-import useMousePosition from '../../hooks/useMousePosition';
-import MaskBackground from './MaskBackground';
-import { useRef, useState, useEffect} from 'react';
+'use client';
+import { useEffect } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 
-export default function Mouse(){
-const { x, y } = useMousePosition();
-const size = 300;
+export default function Index() {
+  const cursorSize = 15;
 
-
-// 
-const [mouseInside, setMouseInside] = useState(true);
-const lastPosition = useRef({ x: 0, y: 0 });
-
-useEffect(() => {
-  const handleMouseLeave = () => setMouseInside(false);
-  const handleMouseEnter = () => setMouseInside(true);
-  
-  window.addEventListener('mouseleave', handleMouseLeave);
-  window.addEventListener('mouseenter', handleMouseEnter);
-  
-  return () => {
-    window.removeEventListener('mouseleave', handleMouseLeave);
-    window.removeEventListener('mouseenter', handleMouseEnter);
+  const mouse = {
+    x: useMotionValue(0),
+    y: useMotionValue(0),
   };
-}, []);
 
-useEffect(() => {
-  if (mouseInside && x !== null && y !== null) {
-    lastPosition.current = { x, y };
-  }
-}, [x, y, mouseInside]);
+  // Slower spring = slight delay
+  const smoothOptions = {
+    damping: 20,
+    stiffness: 300, // lower = more lag
+    mass: 0.5,        // higher = more inertia
+  };
+
+    const smoothOptions2 = {
+    damping: 25,
+    stiffness: 120, // lower = more lag
+    mass: 1,        // higher = more inertia
+  };
 
 
-const displayX = mouseInside ? x : lastPosition.current.x;
-const displayY = mouseInside ? y : lastPosition.current.y;
-// 
+  const smoothMouse = {
+    x: useSpring(mouse.x, smoothOptions),
+    y: useSpring(mouse.y, smoothOptions),
+    x2: useSpring(mouse.x, smoothOptions2),
+    y2: useSpring(mouse.y, smoothOptions2)
+  };
 
-    return (
-            <motion.div
-            className='w-full border-r-[2] border-pink-300 h-full flex items-center justify-center text-[#afa18f] text-[64px] leading-[66px] cursor-none '
-            style={{
-                maskImage: "url('/images/fluff.png')",
-                maskRepeat: 'no-repeat',
-                maskSize: '300px',
-                background: '#fcfcfc',
-                overflow:'visible',
-                color: 'black',
-       
-                
-    
-                
-            }}
-            
-            animate={{
-            webkitMaskPosition: `${displayX  - (size/2)}px ${displayY  - (size/2) }px`,
-            webkitMaskSize: `${size}px`,
-            }}
-            transition={{ type: "tween", ease:"backOut", duration:1.3 }}
-            >
-                 
-                <MaskBackground />
-            </motion.div>
 
-       
-    )
+
+  const manageMouseMove = (e) => {
+    const { clientX, clientY } = e;
+
+    mouse.x.set(clientX - cursorSize / 2);
+    mouse.y.set(clientY - cursorSize / 2);
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', manageMouseMove);
+
+    return () => {
+      window.removeEventListener('mousemove', manageMouseMove);
+    };
+  }, []);
+
+  return (
+    <div>
+      <motion.div
+        style={{
+          left: smoothMouse.x,
+          top: smoothMouse.y,
+          x: '-50%',
+          y: '-50%',
+          
+        }}
+        className="fixed w-[20px] h-[20px] bg-white rounded-full z-2"
+      />
+
+         <motion.div
+        style={{
+          left: smoothMouse.x2,
+          top: smoothMouse.y2,
+          x: '-50%',
+          y: '-50%',
+          
+        }}
+        className="fixed w-[80px] h-[80px] border-white border rounded-full z-2"
+      />
+    </div>
+  );
 }
