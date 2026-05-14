@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
+import { useTexture, useVideoTexture } from "@react-three/drei";
 import {
   useMemo,
   useRef,
@@ -15,39 +15,63 @@ import { WebGPURenderer } from "three/webgpu";
 import { createASCIITexture } from "@/utils/ASCIITextureProvider";
 
 function ShaderPlane() {
-  const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
-  const backgroundObjRef = useRef(null)
+  const instancedMeshRef =
+    useRef<THREE.InstancedMesh>(null);
+
+  const backgroundObjRef =
+    useRef(null);
+
   const geometryRef = useRef<any>(null);
 
-//  const texture = useMemo(() => {
-//   const video = document.createElement("video");
+  // const texture = useMemo(() => {
+  //   const video = document.createElement("video");
 
-//   video.src = "/videos/clip.mp4"; // transparent video
-//   video.loop = true;
-//   video.muted = true;
-//   video.playsInline = true;
-//   video.autoplay = true;
+  //   video.src = "/videos/clip.mp4";
 
-//   video.play();
+  //   video.loop = true;
+  //   video.muted = true;
+  //   video.playsInline = true;
+  //   video.autoplay = true;
 
-//   const videoTexture = new THREE.VideoTexture(video);
+  //   video.play();
 
-//   return videoTexture;
-// }, []);
+  //   const videoTexture =
+  //     new THREE.VideoTexture(video);
+
+  //   return videoTexture;
+  // }, []);
+
   const tempMatrix = useMemo(
     () => new THREE.Matrix4(),
     []
   );
 
-const texture = useTexture('./images/pootsie.png')
-
+  const texture = useVideoTexture(
+  "/videos/my-video.webm",
+  {
+    loop: true,
+    muted: true,
+    start: true,
+    crossOrigin: "anonymous",
+  }
+);
   const dict =
-    `$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^\`'. `;
+    `$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^\`'.    `;
 
   useMemo(
     () => createASCIITexture(dict),
     []
   );
+
+  const videoMaterial = useMemo(() => {
+   const material = new THREE.MeshBasicMaterial({
+  map: texture,
+  side: THREE.FrontSide,
+  toneMapped: false,
+});
+return material
+// videoMaterial.needsUpdate = true;
+  },[texture])
 
   const material = useMemo(
     () =>
@@ -62,12 +86,21 @@ const texture = useTexture('./images/pootsie.png')
 
   const rows = 50;
   const columns = 50;
+
   const count = rows * columns;
+
   const size = 0.1;
 
   const mouse = useRef({
     x: 999,
     y: 999,
+
+    targetX: 999,
+    targetY: 999,
+
+    vx: 0,
+    vy: 0,
+
     moving: false,
   });
 
@@ -182,10 +215,10 @@ const texture = useTexture('./images/pootsie.png')
           2 +
         1;
 
-      mouse.current.x =
+      mouse.current.targetX =
         x * (rows * size * 0.5);
 
-      mouse.current.y =
+      mouse.current.targetY =
         y *
         (columns * size * 0.5);
 
@@ -207,13 +240,42 @@ const texture = useTexture('./images/pootsie.png')
     );
 
     const pushRadius = 0.5;
-    const pushForce = 0.02;
+
+    const pushForce = 0.035;
+
     const spring = 0.05;
+
     const damping = 0.9;
+
+    const mouseSpring = 0.01;
+
+    const mouseDamping = 0.83;
 
     const update = () => {
       if (!instancedMeshRef.current)
         return;
+
+      mouse.current.vx +=
+        (mouse.current.targetX -
+          mouse.current.x) *
+        mouseSpring;
+
+      mouse.current.vy +=
+        (mouse.current.targetY -
+          mouse.current.y) *
+        mouseSpring;
+
+      mouse.current.vx *=
+        mouseDamping;
+
+      mouse.current.vy *=
+        mouseDamping;
+
+      mouse.current.x +=
+        mouse.current.vx;
+
+      mouse.current.y +=
+        mouse.current.vy;
 
       let index = 0;
 
@@ -286,9 +348,11 @@ const texture = useTexture('./images/pootsie.png')
             -physics.y * spring;
 
           physics.vx *= damping;
+
           physics.vy *= damping;
 
           physics.x += physics.vx;
+
           physics.y += physics.vy;
 
           tempMatrix.makeTranslation(
@@ -309,10 +373,12 @@ const texture = useTexture('./images/pootsie.png')
       instancedMeshRef.current.instanceMatrix.needsUpdate =
         true;
 
-      frame = requestAnimationFrame(update);
+      frame =
+        requestAnimationFrame(update);
     };
 
-    let frame = requestAnimationFrame(update);
+    let frame =
+      requestAnimationFrame(update);
 
     return () => {
       window.removeEventListener(
@@ -332,30 +398,49 @@ const texture = useTexture('./images/pootsie.png')
 
   // const backgroundActivity = () => {
   //   let num = 10
-  //   for (let i = 0; i < num; i++){
+
+  //   for (let i = 0; i < num; i++) {
   //     let size = range(0.1, 0.4)
+
   //     let mesh = new THREE.Mesh(
-  //       new THREE.BoxGeometry(size, size, size),
-  //       new THREE.MeshPhysicalMaterial({color:0xffffff})
+  //       new THREE.BoxGeometry(
+  //         size,
+  //         size,
+  //         size
+  //       ),
+  //       new THREE.MeshPhysicalMaterial({
+  //         color: 0xffffff,
+  //       })
   //     )
-  //     mesh.position.set(range(-1,1), range(-1,1), range(-1,1))
-  //     mesh.rotation.set(range(0, Math.PI),range(0,Math.PI),range(0,Math.PI))
-    
+
+  //     mesh.position.set(
+  //       range(-1, 1),
+  //       range(-1, 1),
+  //       range(-1, 1)
+  //     )
+
+  //     mesh.rotation.set(
+  //       range(0, Math.PI),
+  //       range(0, Math.PI),
+  //       range(0, Math.PI)
+  //     )
   //   }
   // }
 
   return (
     <instancedMesh
       ref={instancedMeshRef}
-      material={material}
+      material={videoMaterial}
       args={[
         undefined,
         undefined,
         count,
       ]}
     >
-      
-      <boxGeometry ref={backgroundObjRef}/>
+      {/* <boxGeometry
+        ref={backgroundObjRef}
+      /> */}
+
       <planeGeometry
         ref={geometryRef}
         args={[size, size, 1, 1]}
@@ -400,8 +485,8 @@ export default function ThreeScene() {
         }}
       >
         <ambientLight intensity={1} />
+
         <ShaderPlane />
-        
       </Canvas>
     </div>
   );
