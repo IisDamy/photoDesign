@@ -2,7 +2,7 @@
 import image from '@/public/images/angelo.png'
 import { vec2, float, vec3, Loop, step, Fn, sign, 
     positionLocal, transformNormalToView, dot, uniform,
-    varying, mx_noise_float, color, cross,uv, texture,
+    varying, mx_noise_float, color, cross,uv, texture, 
     mix, vec4,pow, attribute, floor
  } from "three/tsl";
 import * as THREE from "three/webgpu";
@@ -24,6 +24,8 @@ interface GetMaterialsProps {
 
 export default function getMaterial({uTexture, length, asciiTexture}: GetMaterialsProps){
 
+
+
     let material = new THREE.MeshBasicNodeMaterial({
         // wireframe:true,
         transparent: true
@@ -34,6 +36,8 @@ export default function getMaterial({uTexture, length, asciiTexture}: GetMateria
     const uColor3 = uniform(color(pallete[2]))
     const uColor4 = uniform(color(pallete[3]))
     const uColor5 = uniform(color(pallete[4]))
+
+    // const uVideoTexture = uniform(uTexture)
 
     const asciicode = Fn(()=>{
         const textureColor = texture(uTexture, attribute('aPixelUV'))
@@ -55,13 +59,13 @@ export default function getMaterial({uTexture, length, asciiTexture}: GetMateria
         // const asciicode = texture(uTexture)
 
         let finalColor = uColor1
-        finalColor = mix(finalColor, uColor2, step(0.2, brightness));
-        finalColor = mix(finalColor, uColor3, step(0.4, brightness));
-        finalColor = mix(finalColor, uColor4, step(0.6, brightness));
-        finalColor = mix(finalColor, uColor5, step(0.8, brightness));
+        finalColor = mix(finalColor, uColor2, step(0.1, brightness));
+        finalColor = mix(finalColor, uColor3, step(0.2, brightness));
+        finalColor = mix(finalColor, uColor4, step(0.3, brightness));
+        finalColor = mix(finalColor, uColor5, step(0.4, brightness));
 
 
-        // return vec4(finalColor, 1.)
+        // return vec4(textureColor.rgb, 1.0)
         return asciicode.mul(finalColor, 1.2)
 })
 

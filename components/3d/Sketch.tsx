@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { useTexture, useVideoTexture } from "@react-three/drei";
 import {
   useMemo,
@@ -8,13 +8,15 @@ import {
   useEffect,
 } from "react";
 
-import * as THREE from "three";
+// import * as THREE from "three";
 import { range } from "three/tsl";
 import getMaterial from "@/utils/getMaterial";
 import { WebGPURenderer } from "three/webgpu";
 import { createASCIITexture } from "@/utils/ASCIITextureProvider";
-
+import * as THREE from "three/webgpu";
+import { useWindowDimensions } from "@/hooks/useWindowsPosition";
 function ShaderPlane() {
+  const {width, height} = useWindowDimensions()
   const instancedMeshRef =
     useRef<THREE.InstancedMesh>(null);
 
@@ -22,24 +24,6 @@ function ShaderPlane() {
     useRef(null);
 
   const geometryRef = useRef<any>(null);
-
-  // const texture = useMemo(() => {
-  //   const video = document.createElement("video");
-
-  //   video.src = "/videos/clip.mp4";
-
-  //   video.loop = true;
-  //   video.muted = true;
-  //   video.playsInline = true;
-  //   video.autoplay = true;
-
-  //   video.play();
-
-  //   const videoTexture =
-  //     new THREE.VideoTexture(video);
-
-  //   return videoTexture;
-  // }, []);
 
   const tempMatrix = useMemo(
     () => new THREE.Matrix4(),
@@ -53,25 +37,28 @@ function ShaderPlane() {
     muted: true,
     start: true,
     crossOrigin: "anonymous",
+    playsInline:true,
+    
   }
 );
+texture.colorSpace = THREE.SRGBColorSpace
+texture.minFilter = THREE.LinearFilter
+texture.magFilter = THREE.LinearFilter
+texture.generateMipmaps = false
+
+
   const dict =
-    `$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^\`'.    `;
+    `$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^\`'.  `;
 
   useMemo(
     () => createASCIITexture(dict),
     []
   );
 
-  const videoMaterial = useMemo(() => {
-   const material = new THREE.MeshBasicMaterial({
-  map: texture,
-  side: THREE.FrontSide,
-  toneMapped: false,
-});
-return material
-// videoMaterial.needsUpdate = true;
-  },[texture])
+
+
+// const videoMaterial = useMemo(()=> getVideoMaterial(),[texture])
+
 
   const material = useMemo(
     () =>
@@ -241,15 +228,15 @@ return material
 
     const pushRadius = 0.5;
 
-    const pushForce = 0.035;
+    const pushForce = 0.35;
 
-    const spring = 0.05;
+    const spring = 0.5;
 
     const damping = 0.9;
 
-    const mouseSpring = 0.01;
+    const mouseSpring = 0.004;
 
-    const mouseDamping = 0.83;
+    const mouseDamping = 0.9;
 
     const update = () => {
       if (!instancedMeshRef.current)
@@ -427,10 +414,18 @@ return material
   //   }
   // }
 
+  useFrame(()=> {
+    if (texture){
+      texture.needsUpdate = true
+    }
+  })
+
+
+
   return (
     <instancedMesh
       ref={instancedMeshRef}
-      material={videoMaterial}
+      material={material}
       args={[
         undefined,
         undefined,
@@ -445,6 +440,8 @@ return material
         ref={geometryRef}
         args={[size, size, 1, 1]}
       />
+  
+
     </instancedMesh>
   );
 }
@@ -478,7 +475,7 @@ export default function ThreeScene() {
 
           renderer.setClearColor(
             0x000000,
-            1
+            0
           );
 
           return renderer;

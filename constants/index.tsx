@@ -4,3 +4,10 @@ export const circlePath =
    "M298.09,438a24.3,24.3,0,1,1,24.31-24.3A24.3,24.3,0,0,1,298.09,438Z";
 
 export const blood = "#a30104"
+
+
+
+export const image = {
+   angelo: '../assets/angelo.png',
+   pootsie: '../assets/pootsie.png'
+}

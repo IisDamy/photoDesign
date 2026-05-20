@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three/webgpu";
 
 
 export function createASCIITexture(dict:string): THREE.Texture {
@@ -27,8 +27,8 @@ export function createASCIITexture(dict:string): THREE.Texture {
     // Centre each glyph in its own 64px‑wide cell
     
     if (i > 50){
-      for (let j = 0; j < 6 ; j++){
-        ctx.filter = `blur(${j*1})px`
+      for (let j = 0; j < 10 ; j++){
+        ctx.filter = `blur(${j * 1})px`
         ctx.fillText(dict[i], 32 + i*64, 64/2)
       }
     }

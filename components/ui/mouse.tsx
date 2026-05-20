@@ -58,7 +58,7 @@ export default function Index() {
           y: '-50%',
           
         }}
-        className="fixed w-[20px] h-[20px] bg-white rounded-full z-2"
+        className="fixed w-[20px] h-[20px] bg-black rounded-full z-2"
       />
 
          <motion.div
@@ -69,7 +69,7 @@ export default function Index() {
           y: '-50%',
           
         }}
-        className="fixed w-[80px] h-[80px] border-white border rounded-full z-2"
+        className="fixed w-[80px] h-[80px] border-black border rounded-full z-2"
       />
     </div>
   );
