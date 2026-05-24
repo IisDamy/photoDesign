@@ -18,6 +18,8 @@ import { array } from "three/tsl";
 import { image } from "@/constants";
 import pootsieImg from "@/assets/images/pootsie.png";
 import angeloImg from "@/assets/images/angelo.png";
+import noise from "@/shaders/noise.glsl";
+
 
 function ShaderPlane() {
   
@@ -224,6 +226,13 @@ useEffect(() => {
     }
 
   };
+  
+
+ (THREE.ShaderChunk as Record<
+    string,
+    string
+  >
+).noise = noise;
 
   init();
 }, [gl]);

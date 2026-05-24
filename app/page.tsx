@@ -18,7 +18,7 @@ useEffect(()=>{
   
 },[])
   return (
-    <div className="flex h-screen text-white overflow-visible  p-0  items-center justify-center bg-white font-sans text-shadow-black text-shadow-lg"> 
+    <div className="flex h-screen text-white overflow-visible  p-0  items-center justify-center bg-black font-sans text-shadow-black text-shadow-lg"> 
       {/* <p className="font-[Googi] text-2xl z-2  absolute font-bold text-purple-300">I build </p> */}
       <Mouse />
       <FadeTransition />
